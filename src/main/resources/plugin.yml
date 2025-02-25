@@ -4,7 +4,7 @@ main: net.azisaba.simplepresents.SimplePresents
 author: pino223
 api-version: '1.16'
 
-depend: [CrackShot, MythicMobs]
+softdepend: [CrackShot, MythicMobs]
 
 commands:
   getpresent:
