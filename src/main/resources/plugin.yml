@@ -27,3 +27,8 @@ commands:
     usage: /resetpresent <player>
     aliases: [ "resetpresent" ]
     permission: simplepresents.admin
+  clearpresents:
+    description: clear
+    usage: /clearpresents
+    aliases: [ "clearpresents" ]
+    permission: simplepresents.admin
