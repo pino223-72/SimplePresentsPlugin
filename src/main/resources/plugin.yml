@@ -1,0 +1,28 @@
+name: SimplePresents
+version: '${project.version}'
+main: net.azisaba.simplepresents.SimplePresents
+api-version: '1.16'
+
+depend: [CrackShot, MythicMobs]
+
+commands:
+  getpresent:
+    description: プレゼントを取得する
+    usage: /getpresent
+    aliases: ["getpresent", "gp"]
+    permission: default
+  reloadpresents:
+    description: プレゼントをリロードする
+    usage: /reloadpresent
+    aliases: [ "reloadpresent", "rp" ]
+    permission: simplepresents.admin
+  adminpresent:
+    description: admin用presentsGUI
+    usage: /adminpresent
+    aliases: [ "adminpresent", "ap" ]
+    permission: simplepresents.admin
+  resetpresent:
+    description: admin用presentsGUI
+    usage: /resetpresent <player>
+    aliases: [ "resetpresent" ]
+    permission: simplepresents.admin
