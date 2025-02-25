@@ -1,6 +1,7 @@
 name: SimplePresents
 version: '${project.version}'
 main: net.azisaba.simplepresents.SimplePresents
+author: pino223
 api-version: '1.16'
 
 depend: [CrackShot, MythicMobs]
