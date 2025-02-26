@@ -32,12 +32,8 @@ public class SimplePresents extends JavaPlugin {
 
         getLogger().info("SimplePresents has been enabled!");
 
-        // コマンド登録
-        getCommand("getpresent").setExecutor(new PresentCommand(this));
-        getCommand("adminpresent").setExecutor(new PresentCommand(this));
-        getCommand("reloadpresents").setExecutor(new PresentCommand(this));
-        getCommand("clearpresents").setExecutor(new PresentCommand(this));
-        getCommand("resetpresent").setExecutor(new PresentCommand(this));
+        // `/presents` のメインコマンドのみ登録
+        getCommand("presents").setExecutor(new PresentCommand(this));
     }
 
     @Override
@@ -109,7 +105,7 @@ public class SimplePresents extends JavaPlugin {
         }
     }
 
-    private void loadPresentItems() {
+    void loadPresentItems() {
         presentsFile = new File(getDataFolder(), "presents.yml");
         if (!presentsFile.exists()) {
             saveResource("presents.yml", false);
@@ -139,7 +135,7 @@ public class SimplePresents extends JavaPlugin {
         }
     }
 
-    private void loadReceivedPlayers() {
+    public void loadReceivedPlayers() {
         FileConfiguration config = getConfig();
         receivedPlayers.clear();
 
@@ -178,4 +174,22 @@ public class SimplePresents extends JavaPlugin {
         saveReceivedPlayers();
         getLogger().info("すべてのプレゼントデータを削除しました！");
     }
+
+    public void resetPlayerPresents(String playerName) {
+        Player player = Bukkit.getPlayer(playerName);
+        if (player == null) {
+            getLogger().warning("プレイヤー " + playerName + " が見つかりません。");
+            return;
+        }
+
+        UUID playerId = player.getUniqueId();
+        if (receivedPlayers.containsKey(playerId)) {
+            receivedPlayers.remove(playerId);
+            saveReceivedPlayers();
+            player.sendMessage(ChatColor.GREEN + "プレゼントの受け取り履歴がリセットされました！");
+        } else {
+            player.sendMessage(ChatColor.RED + "あなたはまだプレゼントを受け取っていません！");
+        }
+    }
+
 }

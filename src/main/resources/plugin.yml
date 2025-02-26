@@ -6,28 +6,7 @@ api-version: '1.16'
 softdepend: [CrackShot, MythicMobs]
 
 commands:
-  getpresent:
-    description: プレゼントを取得する
-    usage: /getpresent
-    aliases: ["gp"]
-    permission: default
-  reloadpresents:
-    description: プレゼントをリロードする
-    usage: /reloadpresent
-    aliases: ["rp"]
-    permission: simplepresents.admin
-  adminpresent:
-    description: admin用presentsGUI
-    usage: /adminpresent
-    aliases: ["ap"]
-    permission: simplepresents.admin
-  resetpresent:
-    description: プレイヤーの受け取り履歴をリセット
-    usage: /resetpresent <player>
-    aliases: ["resetpresent"]
-    permission: simplepresents.admin
-  clearpresents:
-    description: すべてのプレイヤーの受け取り履歴をリセット
-    usage: /clearpresents
-    aliases: ["clearpresents"]
-    permission: simplepresents.admin
+  presents:
+    description: プレゼント関連のコマンド
+    usage: /presents <subcommand>
+    aliases: ["sp"]
