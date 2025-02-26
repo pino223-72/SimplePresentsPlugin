@@ -192,4 +192,8 @@ public class SimplePresents extends JavaPlugin {
         }
     }
 
+    public Map<String, List<ItemStack>> getPresents() {
+        return presents;
+    }
+
 }
