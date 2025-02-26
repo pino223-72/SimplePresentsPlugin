@@ -10,3 +10,14 @@ commands:
     description: プレゼント関連のコマンド
     usage: /presents <subcommand>
     aliases: ["sp"]
+  presentsadmin:
+    description: プレゼント管理者用コマンド
+    usage: /presentsadmin <help|list>
+    permission: simplepresents.admin
+permissions:
+  simplepresents.use:
+    description: プレゼントを受け取る権限
+    default: true
+  simplepresents.admin:
+    description: プレゼントを管理する権限
+    default: op

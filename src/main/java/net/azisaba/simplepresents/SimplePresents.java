@@ -1,5 +1,8 @@
 package net.azisaba.simplepresents;
 
+import net.azisaba.simplepresents.Listener.AdminCommandPresentsListener;
+import net.azisaba.simplepresents.Listener.AdminPresentChatListener;
+import net.azisaba.simplepresents.Listener.AdminPresentGuiListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -25,16 +28,38 @@ public class SimplePresents extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
+        // config.yml がない場合のみデフォルト設定を保存
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdirs();
+        }
+        File configFile = new File(getDataFolder(), "config.yml");
+        if (!configFile.exists()) {
+            saveResource("config.yml", false);
+        }
+
+        saveDefaultConfig(); // 既存の設定をロード
+
         loadReceivedPlayers();
         loadPresentItems();
         createAdminGUI();
 
         getLogger().info("SimplePresents has been enabled!");
 
-        // `/presents` のメインコマンドのみ登録
-        getCommand("presents").setExecutor(new PresentCommand(this));
+        // イベントリスナー登録
+        Bukkit.getPluginManager().registerEvents(new AdminCommandPresentsListener(this, (Set<UUID>) receivedPlayers), this);
+        Bukkit.getPluginManager().registerEvents(new AdminPresentGuiListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new AdminPresentChatListener(this), this);
+
+        // コマンド登録
+        if (getCommand("presents") != null) {
+            getCommand("presents").setExecutor(new PresentCommand(this));
+        } else {
+            getLogger().severe("コマンド 'presents' が登録されていません！plugin.yml を確認してください！");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
     }
+
 
     @Override
     public void onDisable() {
@@ -70,8 +95,8 @@ public class SimplePresents extends JavaPlugin {
     }
 
     public void givePresent(Player player) {
-        LocalDate today = LocalDate.now();
         UUID playerId = player.getUniqueId();
+        LocalDate today = LocalDate.now();
 
         for (String presentName : presents.keySet()) {
             ConfigurationSection presentSection = presentsConfig.getConfigurationSection("presents." + presentName);
@@ -80,30 +105,38 @@ public class SimplePresents extends JavaPlugin {
             String startStr = presentSection.getString("start");
             String endStr = presentSection.getString("end");
 
-            if (startStr == null || endStr == null) continue; // エラー防止
+            if (startStr == null || endStr == null) continue;
 
             LocalDate startDate = LocalDate.parse(startStr);
             LocalDate endDate = LocalDate.parse(endStr);
 
-            if (!today.isBefore(startDate) && !today.isAfter(endDate)) {
-                Set<String> received = receivedPlayers.getOrDefault(playerId, new HashSet<>());
-                if (received.contains(presentName)) {
-                    player.sendMessage(ChatColor.RED + "すでにこのプレゼントを受け取っています！");
-                    continue;
-                }
-
-                for (ItemStack item : presents.get(presentName)) {
-                    player.getInventory().addItem(item);
-                }
-
-                received.add(presentName);
-                receivedPlayers.put(playerId, received);
-                saveReceivedPlayers();
-
-                player.sendMessage(ChatColor.GREEN + "プレゼントを受け取りました！");
+            // 期間内でない場合はスキップ
+            if (today.isBefore(startDate) || today.isAfter(endDate)) {
+                continue;
             }
+
+            // 受け取り履歴をチェック
+            Set<String> received = receivedPlayers.getOrDefault(playerId, new HashSet<>());
+            if (received.contains(presentName)) {
+                player.sendMessage(ChatColor.RED + "すでに「" + presentName + "」を受け取っています！");
+                continue;
+            }
+
+            // プレゼントを渡す
+            for (ItemStack item : presents.get(presentName)) {
+                player.getInventory().addItem(item);
+            }
+
+            // 受け取り履歴を更新
+            received.add(presentName);
+            receivedPlayers.put(playerId, received);
+            saveReceivedPlayers();
+
+            player.sendMessage(ChatColor.GREEN + "プレゼント「" + presentName + "」を受け取りました！");
         }
     }
+
+
 
     void loadPresentItems() {
         presentsFile = new File(getDataFolder(), "presents.yml");
@@ -135,18 +168,20 @@ public class SimplePresents extends JavaPlugin {
         }
     }
 
-    public void loadReceivedPlayers() {
+    private void loadReceivedPlayers() {
         FileConfiguration config = getConfig();
         receivedPlayers.clear();
 
         ConfigurationSection playersSection = config.getConfigurationSection("receivedPlayers");
         if (playersSection != null) {
             for (String uuid : playersSection.getKeys(false)) {
-                Set<String> receivedSet = new HashSet<>(playersSection.getStringList(uuid));
-                receivedPlayers.put(UUID.fromString(uuid), receivedSet);
+                List<String> receivedList = playersSection.getStringList(uuid);
+                receivedPlayers.put(UUID.fromString(uuid), new HashSet<>(receivedList));
             }
         }
     }
+
+
 
     private void saveReceivedPlayers() {
         FileConfiguration config = getConfig();
@@ -158,6 +193,8 @@ public class SimplePresents extends JavaPlugin {
 
         saveConfig();
     }
+
+
 
     public Inventory getAdminGUI() {
         return adminGUI;
@@ -192,8 +229,24 @@ public class SimplePresents extends JavaPlugin {
         }
     }
 
+
     public Map<String, List<ItemStack>> getPresents() {
         return presents;
+    }
+
+    private final HashMap<UUID, Boolean> awaitingName = new HashMap<>();
+
+    public void setAwaitingName(UUID uuid, boolean awaiting) {
+        awaitingName.put(uuid, awaiting);
+    }
+
+    public boolean isAwaitingName(UUID uuid) {
+        return awaitingName.getOrDefault(uuid, false);
+    }
+
+    public void savePresent(String presentName, List<ItemStack> items) {
+        presents.put(presentName, items);
+        savePresentItems();
     }
 
 }
