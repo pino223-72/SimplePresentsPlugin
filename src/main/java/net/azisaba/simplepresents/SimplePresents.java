@@ -28,25 +28,18 @@ public class SimplePresents extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // config.yml がない場合のみデフォルト設定を保存
-        if (!getDataFolder().exists()) {
-            getDataFolder().mkdirs();
-        }
-        File configFile = new File(getDataFolder(), "config.yml");
-        if (!configFile.exists()) {
-            saveResource("config.yml", false);
-        }
-
-        saveDefaultConfig(); // 既存の設定をロード
-
+        saveDefaultConfig();
         loadReceivedPlayers();
         loadPresentItems();
         createAdminGUI();
 
         getLogger().info("SimplePresents has been enabled!");
 
-        // イベントリスナー登録
-        Bukkit.getPluginManager().registerEvents(new AdminCommandPresentsListener(this, (Set<UUID>) receivedPlayers), this);
+        // 受け取り済みプレイヤーのUUIDリストを取得
+        Set<UUID> receivedUUIDs = receivedPlayers.keySet();
+
+        // イベントリスナー登録（エラー修正済み）
+        Bukkit.getPluginManager().registerEvents(new AdminCommandPresentsListener(this, receivedUUIDs), this);
         Bukkit.getPluginManager().registerEvents(new AdminPresentGuiListener(this), this);
         Bukkit.getPluginManager().registerEvents(new AdminPresentChatListener(this), this);
 
@@ -83,7 +76,6 @@ public class SimplePresents extends JavaPlugin {
             LocalDate startDate = LocalDate.parse(startStr);
             LocalDate endDate = LocalDate.parse(endStr);
 
-            // 期間内かつ未受け取りなら受け取れる
             if (!today.isBefore(startDate) && !today.isAfter(endDate)) {
                 Set<String> received = receivedPlayers.getOrDefault(playerId, new HashSet<>());
                 if (!received.contains(presentName)) {
@@ -110,24 +102,20 @@ public class SimplePresents extends JavaPlugin {
             LocalDate startDate = LocalDate.parse(startStr);
             LocalDate endDate = LocalDate.parse(endStr);
 
-            // 期間内でない場合はスキップ
             if (today.isBefore(startDate) || today.isAfter(endDate)) {
                 continue;
             }
 
-            // 受け取り履歴をチェック
             Set<String> received = receivedPlayers.getOrDefault(playerId, new HashSet<>());
             if (received.contains(presentName)) {
                 player.sendMessage(ChatColor.RED + "すでに「" + presentName + "」を受け取っています！");
                 continue;
             }
 
-            // プレゼントを渡す
             for (ItemStack item : presents.get(presentName)) {
                 player.getInventory().addItem(item);
             }
 
-            // 受け取り履歴を更新
             received.add(presentName);
             receivedPlayers.put(playerId, received);
             saveReceivedPlayers();
@@ -135,8 +123,6 @@ public class SimplePresents extends JavaPlugin {
             player.sendMessage(ChatColor.GREEN + "プレゼント「" + presentName + "」を受け取りました！");
         }
     }
-
-
 
     void loadPresentItems() {
         presentsFile = new File(getDataFolder(), "presents.yml");
@@ -181,11 +167,9 @@ public class SimplePresents extends JavaPlugin {
         }
     }
 
-
-
     private void saveReceivedPlayers() {
         FileConfiguration config = getConfig();
-        config.set("receivedPlayers", null); // 一度クリアして再保存
+        config.set("receivedPlayers", null);
 
         for (Map.Entry<UUID, Set<String>> entry : receivedPlayers.entrySet()) {
             config.set("receivedPlayers." + entry.getKey().toString(), new ArrayList<>(entry.getValue()));
@@ -193,8 +177,6 @@ public class SimplePresents extends JavaPlugin {
 
         saveConfig();
     }
-
-
 
     public Inventory getAdminGUI() {
         return adminGUI;
@@ -211,42 +193,4 @@ public class SimplePresents extends JavaPlugin {
         saveReceivedPlayers();
         getLogger().info("すべてのプレゼントデータを削除しました！");
     }
-
-    public void resetPlayerPresents(String playerName) {
-        Player player = Bukkit.getPlayer(playerName);
-        if (player == null) {
-            getLogger().warning("プレイヤー " + playerName + " が見つかりません。");
-            return;
-        }
-
-        UUID playerId = player.getUniqueId();
-        if (receivedPlayers.containsKey(playerId)) {
-            receivedPlayers.remove(playerId);
-            saveReceivedPlayers();
-            player.sendMessage(ChatColor.GREEN + "プレゼントの受け取り履歴がリセットされました！");
-        } else {
-            player.sendMessage(ChatColor.RED + "あなたはまだプレゼントを受け取っていません！");
-        }
-    }
-
-
-    public Map<String, List<ItemStack>> getPresents() {
-        return presents;
-    }
-
-    private final HashMap<UUID, Boolean> awaitingName = new HashMap<>();
-
-    public void setAwaitingName(UUID uuid, boolean awaiting) {
-        awaitingName.put(uuid, awaiting);
-    }
-
-    public boolean isAwaitingName(UUID uuid) {
-        return awaitingName.getOrDefault(uuid, false);
-    }
-
-    public void savePresent(String presentName, List<ItemStack> items) {
-        presents.put(presentName, items);
-        savePresentItems();
-    }
-
 }
