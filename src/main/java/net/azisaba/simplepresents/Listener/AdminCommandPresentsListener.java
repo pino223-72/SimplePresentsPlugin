@@ -25,7 +25,7 @@ public class AdminCommandPresentsListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().equals(ChatColor.RED + "管理者用プレゼント設定")) {
+        if (event.getView().getTitle().equals(ChatColor.RED + "Adminプレゼント設定")) {
             if (event.getCurrentItem() != null && event.getCurrentItem().getType() == Material.EMERALD_BLOCK) {
                 plugin.savePresentItems();
                 event.getWhoClicked().sendMessage(ChatColor.GREEN + "プレゼントを保存しました！");

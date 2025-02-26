@@ -1,2 +1,16 @@
 presents:
-  example_present: "Example Item"
+  "Examaple1":
+    start: "2025-01-05"
+    end: "2025-01-10"
+    items:
+      - type: DIAMOND
+        amount: 3
+      - type: GOLD_INGOT
+        amount: 5
+
+  "Examaple2":
+    start: "2025-02-01"
+    end: "2025-02-07"
+    items:
+      - type: EMERALD
+        amount: 10

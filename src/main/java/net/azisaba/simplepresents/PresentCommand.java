@@ -16,23 +16,34 @@ public class PresentCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (label.equalsIgnoreCase("getpresent") && sender instanceof Player) {
-            plugin.givePresent((Player) sender);
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(ChatColor.RED + "このコマンドはプレイヤーのみ使用できます。");
             return true;
         }
 
-        if (label.equalsIgnoreCase("adminpresent") && sender instanceof Player) {
-            ((Player) sender).openInventory(plugin.getAdminGUI());
-            return true;
-        }
+        Player player = (Player) sender;
 
-        if (label.equalsIgnoreCase("clearpresents")) {
-            plugin.getPresentItems().clear();
-            plugin.savePresentItems();
-            sender.sendMessage(ChatColor.GREEN + "プレゼントを削除しました！");
-            return true;
-        }
+        switch (label.toLowerCase()) {
+            case "getpresent":
+                if (plugin.canReceivePresent(player)) {
+                    plugin.givePresent(player);
+                } else {
+                    player.sendMessage(ChatColor.RED + "現在、受け取れるプレゼントはありません！");
+                }
+                return true;
 
-        return false;
+            case "adminpresent":
+                player.openInventory(plugin.getAdminGUI());
+                return true;
+
+            case "clearpresents":
+                plugin.clearPresents();
+                sender.sendMessage(ChatColor.GREEN + "すべてのプレゼントデータをクリアしました！");
+                return true;
+
+            default:
+                sender.sendMessage(ChatColor.RED + "未知のコマンドです！");
+                return false;
+        }
     }
 }
