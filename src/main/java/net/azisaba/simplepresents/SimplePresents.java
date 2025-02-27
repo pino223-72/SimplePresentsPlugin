@@ -189,9 +189,11 @@ public class SimplePresents extends JavaPlugin {
         return adminGUI;
     }
 
-    private void createAdminGUI() {
-        adminGUI = Bukkit.createInventory(null, 9, ChatColor.RED + "管理者用プレゼント設定");
+    public void createAdminGUI() {
+        AdminPresentGuiListener guiListener = new AdminPresentGuiListener(this);
+        adminGUI = guiListener.createAdminGUI();
     }
+
 
     public void clearPresents() {
         presents.clear();
@@ -234,4 +236,17 @@ public class SimplePresents extends JavaPlugin {
     public Map<String, List<ItemStack>> getPresents() {
         return presents;
     }
+
+    private ItemStack[] tempItems = new ItemStack[9];  // 1行分だけ保持（上段）
+
+    public void setTempItems(ItemStack[] items) {
+        tempItems = new ItemStack[9];
+        System.arraycopy(items, 0, tempItems, 0, 9);
+    }
+
+    public ItemStack[] getTempItems() {
+        return tempItems;
+    }
+
+
 }
