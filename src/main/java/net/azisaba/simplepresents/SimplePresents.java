@@ -2,7 +2,7 @@ package net.azisaba.simplepresents;
 
 import net.azisaba.simplepresents.Listener.AdminPresentChatListener;
 import net.azisaba.simplepresents.Listener.AdminPresentGuiListener;
-import net.azisaba.simplepresents.command.PresentCommand;
+import net.azisaba.simplepresents.PresentCommand;
 import net.azisaba.simplepresents.model.PresentItem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -174,4 +174,65 @@ public class SimplePresents extends JavaPlugin {
     public boolean isAwaitingName(UUID uuid) {
         return awaitingName.getOrDefault(uuid, false);
     }
+
+    public void loadReceivedPlayers() {
+        FileConfiguration config = getConfig();
+        receivedPlayers.clear();
+
+        ConfigurationSection playersSection = config.getConfigurationSection("receivedPlayers");
+        if (playersSection != null) {
+            for (String uuid : playersSection.getKeys(false)) {
+                List<String> receivedList = playersSection.getStringList(uuid);
+                receivedPlayers.put(UUID.fromString(uuid), new HashSet<>(receivedList));
+            }
+        }
+    }
+
+    public void saveReceivedPlayers() {
+        FileConfiguration config = getConfig();
+        config.set("receivedPlayers", null); // 一度クリアして再保存
+
+        for (Map.Entry<UUID, Set<String>> entry : receivedPlayers.entrySet()) {
+            config.set("receivedPlayers." + entry.getKey().toString(), new ArrayList<>(entry.getValue()));
+        }
+
+        saveConfig();
+    }
+
+    public void showPresentList(Player player) {
+        player.sendMessage(ChatColor.BLUE + "===SimplePresents プレゼント一覧===");
+
+        if (presents.isEmpty()) {
+            player.sendMessage(ChatColor.GRAY + "現在、登録されているプレゼントはありません。");
+        } else {
+            for (String presentName : presents.keySet()) {
+                player.sendMessage(ChatColor.AQUA + "- " + presentName);
+            }
+        }
+
+        player.sendMessage(ChatColor.BLUE + "==========================");
+    }
+
+    public void savePresent(String presentName, List<PresentItem> items) {
+        presents.put(presentName, items); // メモリ上に保存
+
+        // presents.ymlにも保存
+        List<Map<String, Object>> serializedItems = new ArrayList<>();
+        for (PresentItem item : items) {
+            serializedItems.add(item.serialize());
+        }
+
+        presentsConfig.set("presents." + presentName + ".items", serializedItems);
+        presentsConfig.set("presents." + presentName + ".start", "2025-01-01"); // 仮の日付
+        presentsConfig.set("presents." + presentName + ".end", "2025-1-3");   // 仮の日付
+
+        try {
+            presentsConfig.save(presentsFile);
+        } catch (IOException e) {
+            getLogger().severe("プレゼントデータの保存に失敗しました: " + presentName);
+            e.printStackTrace();
+        }
+    }
+
+
 }

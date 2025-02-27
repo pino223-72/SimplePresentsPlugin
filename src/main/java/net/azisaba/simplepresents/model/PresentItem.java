@@ -1,13 +1,13 @@
 package net.azisaba.simplepresents.model;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.SerializableAs;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@SerializableAs("PresentItem")
 public class PresentItem implements ConfigurationSerializable {
 
     public enum ItemType {
@@ -15,78 +15,69 @@ public class PresentItem implements ConfigurationSerializable {
     }
 
     private final ItemType type;
-    private final ItemStack vanillaItem;
-    private final String crackshotName;
-    private final String mythicMobsName;
+    private final ItemStack itemStack; // VANILLAの場合
+    private final String identifier;   // CRACKSHOT・MYTHICMOBSの場合
 
-    // コンストラクタ（VANILLA用）
-    public PresentItem(ItemStack vanillaItem) {
-        this.type = ItemType.VANILLA;
-        this.vanillaItem = vanillaItem;
-        this.crackshotName = null;
-        this.mythicMobsName = null;
+    public PresentItem(ItemType type, ItemStack itemStack, String identifier) {
+        this.type = type;
+        this.itemStack = itemStack;
+        this.identifier = identifier;
     }
 
-    // コンストラクタ（CRACKSHOT用）
-    public PresentItem(String crackshotName) {
-        this.type = ItemType.CRACKSHOT;
-        this.vanillaItem = null;
-        this.crackshotName = crackshotName;
-        this.mythicMobsName = null;
+    // ItemStackからVanillaアイテムとして作成
+    public static PresentItem fromItemStack(ItemStack item) {
+        return new PresentItem(ItemType.VANILLA, item, null);
     }
 
-    // コンストラクタ（MYTHICMOBS用）
-    public PresentItem(String mythicMobsName, boolean isMythic) {
-        this.type = ItemType.MYTHICMOBS;
-        this.vanillaItem = null;
-        this.crackshotName = null;
-        this.mythicMobsName = mythicMobsName;
+    // プレイヤーにアイテムを付与
+    public void giveTo(Player player) {
+        switch (type) {
+            case VANILLA:
+                player.getInventory().addItem(itemStack);
+                break;
+            case CRACKSHOT:
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "crackshot give " + player.getName() + " " + identifier);
+                break;
+            case MYTHICMOBS:
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mm items get " + identifier + " 1 " + player.getName());
+                break;
+        }
+    }
+
+    // シリアライズ処理 (YAML保存用)
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", type.name());
+        if (type == ItemType.VANILLA) {
+            map.put("itemstack", itemStack);
+        } else {
+            map.put("identifier", identifier);
+        }
+        return map;
+    }
+
+    // デシリアライズ処理 (YAML読み込み用)
+    public static PresentItem deserialize(Map<String, Object> map) {
+        ItemType type = ItemType.valueOf((String) map.get("type"));
+        if (type == ItemType.VANILLA) {
+            ItemStack itemStack = (ItemStack) map.get("itemstack");
+            return new PresentItem(type, itemStack, null);
+        } else {
+            String identifier = (String) map.get("identifier");
+            return new PresentItem(type, null, identifier);
+        }
     }
 
     public ItemType getType() {
         return type;
     }
 
-    public ItemStack getVanillaItem() {
-        return vanillaItem;
+    public ItemStack getItemStack() {
+        return itemStack;
     }
 
-    public String getCrackshotName() {
-        return crackshotName;
-    }
-
-    public String getMythicMobsName() {
-        return mythicMobsName;
-    }
-
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("type", type.name());
-        switch (type) {
-            case VANILLA:
-                map.put("itemstack", vanillaItem);
-                break;
-            case CRACKSHOT:
-                map.put("crackshot", crackshotName);
-                break;
-            case MYTHICMOBS:
-                map.put("mythic", mythicMobsName);
-                break;
-        }
-        return map;
-    }
-
-    public static PresentItem deserialize(Map<String, Object> map) {
-        ItemType type = ItemType.valueOf((String) map.get("type"));
-        switch (type) {
-            case VANILLA:
-                return new PresentItem((ItemStack) map.get("itemstack"));
-            case CRACKSHOT:
-                return new PresentItem((String) map.get("crackshot"));
-            case MYTHICMOBS:
-                return new PresentItem((String) map.get("mythic"), true);
-        }
-        throw new IllegalArgumentException("Unknown PresentItem type: " + type);
+    public String getIdentifier() {
+        return identifier;
     }
 }
