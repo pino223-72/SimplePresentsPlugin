@@ -64,7 +64,7 @@ public class PresentCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.AQUA + "adminresetplayer <player> - プレイヤーのプレゼント受け取り履歴をリセットします");
                 sender.sendMessage(ChatColor.AQUA + "reload - 設定をリロードします");
                 sender.sendMessage(ChatColor.AQUA + "help - このヘルプを表示します");
-                sender.sendMessage(ChatColor.BLUE + "===========================");
+                sender.sendMessage(ChatColor.BLUE + "=======================");
                 break;
             case "list":
                 sender.sendMessage(ChatColor.GOLD + "現在のプレゼント一覧: " + plugin.getPresents().keySet());

@@ -13,29 +13,59 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class AdminPresentGuiListener implements Listener {
-
     private final SimplePresents plugin;
 
     public AdminPresentGuiListener(SimplePresents plugin) {
         this.plugin = plugin;
     }
 
-    // 2行GUI＋下段ガラス＋保存ボタン
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!event.getView().getTitle().equals(ChatColor.RED + "プレゼント設定")) {
+            return;
+        }
+
+        int slot = event.getRawSlot();
+
+        // 下段（9〜16番）は灰色ガラス固定
+        if (slot >= 9 && slot <= 16) {
+            event.setCancelled(true);
+        }
+
+        // 右下の保存ボタン（17番）をクリックした場合
+        if (slot == 17) {
+            event.setCancelled(true);
+            Player player = (Player) event.getWhoClicked();
+            player.sendMessage(ChatColor.YELLOW + "プレゼントの名前をチャットで入力してください！");
+            player.closeInventory();
+            plugin.setAwaitingName(player.getUniqueId(), true);
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (!event.getView().getTitle().equals(ChatColor.RED + "プレゼント設定")) {
+            return;
+        }
+        // 必要ならクローズ時の処理を書く
+    }
+
     public Inventory createAdminGUI() {
         Inventory gui = plugin.getServer().createInventory(null, 18, ChatColor.RED + "プレゼント設定");
 
-        // 下段の左8スロットを灰色ガラスで埋める
+        // 下段（9～16番）に灰色の板ガラスをセット
         ItemStack grayGlass = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta grayMeta = grayGlass.getItemMeta();
-        if (grayMeta != null) {
-            grayMeta.setDisplayName(" ");
-            grayGlass.setItemMeta(grayMeta);
+        ItemMeta meta = grayGlass.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.GRAY + " ");
+            grayGlass.setItemMeta(meta);
         }
+
         for (int i = 9; i < 17; i++) {
             gui.setItem(i, grayGlass);
         }
 
-        // 右下に保存ボタン
+        // 右下のスロット（17番）に「保存する」ボタンを配置
         ItemStack saveItem = new ItemStack(Material.EMERALD_BLOCK);
         ItemMeta saveMeta = saveItem.getItemMeta();
         if (saveMeta != null) {
@@ -45,29 +75,5 @@ public class AdminPresentGuiListener implements Listener {
         gui.setItem(17, saveItem);
 
         return gui;
-    }
-
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        Inventory inv = event.getInventory();
-        if (!inv.equals(plugin.getAdminGUI())) {
-            return;
-        }
-
-        event.setCancelled(true);  // アイテム移動禁止
-        Player player = (Player) event.getWhoClicked();
-
-        if (event.getRawSlot() == 17) {  // 保存ボタン
-            player.closeInventory();
-            player.sendMessage(ChatColor.YELLOW + "プレゼント名をチャットに入力してください。");
-            plugin.setAwaitingName(player.getUniqueId(), true);  // 名前入力待ち状態に設定
-        }
-    }
-
-    @EventHandler
-    public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getInventory().equals(plugin.getAdminGUI())) {
-            plugin.setTempItems(event.getInventory().getContents());  // 一時保存
-        }
     }
 }
