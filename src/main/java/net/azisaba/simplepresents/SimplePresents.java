@@ -105,31 +105,51 @@ public class SimplePresents extends JavaPlugin {
             LocalDate startDate = LocalDate.parse(startStr);
             LocalDate endDate = LocalDate.parse(endStr);
 
-            // 期間内でない場合はスキップ
+            // 期間外ならスキップ
             if (today.isBefore(startDate) || today.isAfter(endDate)) {
                 continue;
             }
 
-            // 受け取り履歴をチェック
             Set<String> received = receivedPlayers.getOrDefault(playerId, new HashSet<>());
             if (received.contains(presentName)) {
-                player.sendMessage(ChatColor.RED + "すでに「" + presentName + "」を受け取っています！");
+                player.sendMessage(ChatColor.RED + "すでに「" + presentName + "」のプレゼントは受け取り済みです。");
                 continue;
             }
 
-            // プレゼントを渡す
-            for (ItemStack item : presents.get(presentName)) {
-                player.getInventory().addItem(item);
+            List<Map<?, ?>> items = presentsConfig.getMapList("presents." + presentName + ".items");
+
+            for (Map<?, ?> map : items) {
+                if (!map.containsKey("type")) continue;
+                String type = (String) map.get("type");
+
+                switch (type.toUpperCase()) {
+                    case "VANILLA":
+                        ItemStack item = (ItemStack) map.get("itemstack");
+                        player.getInventory().addItem(item);
+                        break;
+                    case "CRACKSHOT":
+                        String crackshotItem = (String) map.get("crackshot");
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "crackshot give " + player.getName() + " " + crackshotItem + " 1");
+                        break;
+                    case "MYTHICMOBS":
+                        String mythicItem = (String) map.get("mythic");
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mm items get " + mythicItem + " 1 " + player.getName());
+                        break;
+                    default:
+                        getLogger().warning("未知のアイテムタイプ: " + type);
+                        break;
+                }
             }
 
-            // 受け取り履歴を更新
             received.add(presentName);
             receivedPlayers.put(playerId, received);
             saveReceivedPlayers();
 
-            player.sendMessage(ChatColor.GREEN + "プレゼント「" + presentName + "」を受け取りました！");
+            String message = presentSection.getString("message", "&aプレゼント「" + presentName + "」を受け取りました！");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
         }
     }
+
 
     void loadPresentItems() {
         presentsFile = new File(getDataFolder(), "presents.yml");

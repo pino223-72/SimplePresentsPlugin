@@ -1,16 +1,15 @@
 presents:
-  "Examaple1":
-    start: "2025-01-05"
+  NewYearGiftExample:
+    start: "2025-01-01"
     end: "2025-01-10"
+    message: "&aお年玉を受け取りました！"
     items:
-      - type: DIAMOND
-        amount: 3
-      - type: GOLD_INGOT
-        amount: 5
-
-  "Examaple2":
-    start: "2025-02-01"
-    end: "2025-02-07"
-    items:
-      - type: EMERALD
-        amount: 10
+      - type: "VANILLA"
+        itemstack:
+          ==: org.bukkit.inventory.ItemStack
+          type: DIAMOND
+          amount: 1
+      - type: "CRACKSHOT"
+        crackshot: "SniperRifle"
+      - type: "MYTHICMOBS"
+        mythic: "LegendSword"
