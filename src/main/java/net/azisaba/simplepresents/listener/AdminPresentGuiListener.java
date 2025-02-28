@@ -1,4 +1,4 @@
-package net.azisaba.simplepresents.Listener;
+package net.azisaba.simplepresents.listener;
 
 import net.azisaba.simplepresents.SimplePresents;
 import org.bukkit.ChatColor;
@@ -24,24 +24,25 @@ public class AdminPresentGuiListener implements Listener {
         Inventory inv = event.getInventory();
         Player player = (Player) event.getWhoClicked();
 
-        if (!player.getOpenInventory().getTitle().equals(ChatColor.RED + "プレゼント設定")) {
+        if (!event.getView().getTitle().equals(ChatColor.RED + "プレゼント設定")) {
             return;
         }
 
         int slot = event.getRawSlot();
 
-        // 下段の板ガラス・保存ボタンはクリック不可
-        if (slot >= 9) {
+        // 下段9枠（9〜16）と保存ボタン（17）はクリック禁止
+        if (slot >= 9 && slot <= 16) {
             event.setCancelled(true);
+        }
 
-            if (slot == 17) {
-                // 保存ボタン押下時
-                player.sendMessage(ChatColor.YELLOW + "プレゼント名をチャットで入力してください！");
-                plugin.setAwaitingName(player.getUniqueId(), true);
-                player.closeInventory();
-            }
+        if (slot == 17) { // 保存ボタン
+            event.setCancelled(true);
+            player.sendMessage(ChatColor.YELLOW + "プレゼントの名前をチャットで入力してください！");
+            player.closeInventory();
+            plugin.setAwaitingName(player.getUniqueId(), true);
         }
     }
+
 
     public Inventory createAdminGUI() {
         Inventory gui = plugin.getServer().createInventory(null, 18, ChatColor.RED + "プレゼント設定");

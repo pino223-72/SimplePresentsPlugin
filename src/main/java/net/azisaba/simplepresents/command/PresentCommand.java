@@ -1,5 +1,6 @@
-package net.azisaba.simplepresents;
+package net.azisaba.simplepresents.command;
 
+import net.azisaba.simplepresents.SimplePresents;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -43,7 +44,7 @@ public class PresentCommand implements CommandExecutor {
                 break;
 
             case "list":
-                plugin.showPresentList(sender);
+                plugin.showPresentList((Player) sender);
                 break;
 
             case "adminresetplayer":

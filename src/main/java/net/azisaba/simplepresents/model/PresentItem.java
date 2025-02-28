@@ -8,76 +8,83 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PresentItem implements ConfigurationSerializable {
-
-    public enum ItemType {
-        VANILLA, CRACKSHOT, MYTHICMOBS
-    }
+public class PresentItem {
 
     private final ItemType type;
-    private final ItemStack itemStack; // VANILLAの場合
-    private final String identifier;   // CRACKSHOT・MYTHICMOBSの場合
+    private final ItemStack itemStack;
+    private final String crackshot;
+    private final String mythic;
 
-    public PresentItem(ItemType type, ItemStack itemStack, String identifier) {
-        this.type = type;
+    public enum ItemType {
+        VANILLA,
+        CRACKSHOT,
+        MYTHICMOBS
+    }
+
+    public PresentItem(ItemStack itemStack) {
+        this.type = ItemType.VANILLA;
         this.itemStack = itemStack;
-        this.identifier = identifier;
+        this.crackshot = null;
+        this.mythic = null;
     }
 
-    // ItemStackからVanillaアイテムとして作成
-    public static PresentItem fromItemStack(ItemStack item) {
-        return new PresentItem(ItemType.VANILLA, item, null);
+    public PresentItem(String crackshot) {
+        this.type = ItemType.CRACKSHOT;
+        this.itemStack = null;
+        this.crackshot = crackshot;
+        this.mythic = null;
     }
 
-    // プレイヤーにアイテムを付与
+    public PresentItem(String mythic, boolean isMythic) {
+        this.type = ItemType.MYTHICMOBS;
+        this.itemStack = null;
+        this.crackshot = null;
+        this.mythic = mythic;
+    }
+
     public void giveTo(Player player) {
         switch (type) {
             case VANILLA:
                 player.getInventory().addItem(itemStack);
                 break;
             case CRACKSHOT:
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "crackshot give " + player.getName() + " " + identifier);
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "crackshot give " + player.getName() + " " + crackshot);
                 break;
             case MYTHICMOBS:
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mm items get " + identifier + " 1 " + player.getName());
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mm items give " + player.getName() + " " + mythic);
                 break;
         }
     }
 
-    // シリアライズ処理 (YAML保存用)
-    @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put("type", type.name());
-        if (type == ItemType.VANILLA) {
-            map.put("itemstack", itemStack);
-        } else {
-            map.put("identifier", identifier);
+
+        switch (type) {
+            case VANILLA:
+                map.put("itemstack", itemStack);
+                break;
+            case CRACKSHOT:
+                map.put("crackshot", crackshot);
+                break;
+            case MYTHICMOBS:
+                map.put("mythic", mythic);
+                break;
         }
+
         return map;
     }
 
-    // デシリアライズ処理 (YAML読み込み用)
     public static PresentItem deserialize(Map<String, Object> map) {
         ItemType type = ItemType.valueOf((String) map.get("type"));
-        if (type == ItemType.VANILLA) {
-            ItemStack itemStack = (ItemStack) map.get("itemstack");
-            return new PresentItem(type, itemStack, null);
-        } else {
-            String identifier = (String) map.get("identifier");
-            return new PresentItem(type, null, identifier);
+        switch (type) {
+            case VANILLA:
+                return new PresentItem((ItemStack) map.get("itemstack"));
+            case CRACKSHOT:
+                return new PresentItem((String) map.get("crackshot"));
+            case MYTHICMOBS:
+                return new PresentItem((String) map.get("mythic"), true);
         }
-    }
-
-    public ItemType getType() {
-        return type;
-    }
-
-    public ItemStack getItemStack() {
-        return itemStack;
-    }
-
-    public String getIdentifier() {
-        return identifier;
+        throw new IllegalArgumentException("不明なアイテムタイプ: " + type);
     }
 }

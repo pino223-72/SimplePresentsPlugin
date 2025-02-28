@@ -1,4 +1,4 @@
-package net.azisaba.simplepresents.Listener;
+package net.azisaba.simplepresents.listener;
 
 import net.azisaba.simplepresents.SimplePresents;
 import net.azisaba.simplepresents.model.PresentItem;
