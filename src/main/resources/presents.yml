@@ -1,15 +1,13 @@
 presents:
-  NewYearGiftExample:
+  NewYearGift:
     start: "2025-01-01"
     end: "2025-01-10"
     message: "&aお年玉を受け取りました！"
+    Predictive_Conversion: true
+    Passed_at_login: true
     items:
-      - type: "VANILLA"
+      - type: VANILLA
         itemstack:
           ==: org.bukkit.inventory.ItemStack
+          v: 2586
           type: DIAMOND
-          amount: 1
-      - type: "CRACKSHOT"
-        crackshot: "SniperRifle"
-      - type: "MYTHICMOBS"
-        mythic: "LegendSword"
