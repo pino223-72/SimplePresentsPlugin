@@ -93,8 +93,8 @@ public class SimplePresents extends JavaPlugin {
                 continue;
             }
 
-            // 日付文字列を適切な形式に変換
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzzz yyyy");
+            // 日付文字列を適切なフォーマットで解析
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate startDate = LocalDate.parse(startStr, formatter);
             LocalDate endDate = LocalDate.parse(endStr, formatter);
 
@@ -110,7 +110,7 @@ public class SimplePresents extends JavaPlugin {
             }
 
             // プレゼントを付与
-            Present present = (Present) presents.get(presentName);
+            Present present = presents.get(presentName);
             if (present == null) {
                 getLogger().warning("プレゼント " + presentName + " のデータが見つかりません。");
                 continue;
