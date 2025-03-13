@@ -24,50 +24,23 @@ public class AdminPresentGuiListener implements Listener {
         Inventory inv = event.getInventory();
         Player player = (Player) event.getWhoClicked();
 
+        // GUIのタイトルチェック
         if (!event.getView().getTitle().equals(ChatColor.RED + "プレゼント設定")) {
             return;
         }
 
         int slot = event.getRawSlot();
 
-        // 下段9枠（9〜16）と保存ボタン（17）はクリック禁止
-        if (slot >= 9 && slot <= 16) {
+        // 下段9〜17のクリックを禁止
+        if (slot >= 9 && slot <= 17) {
             event.setCancelled(true);
         }
 
-        if (slot == 17) { // 保存ボタン
-            event.setCancelled(true);
+        // 保存ボタン（17）がクリックされたとき
+        if (slot == 17) {
             player.sendMessage(ChatColor.YELLOW + "プレゼントの名前をチャットで入力してください！");
             player.closeInventory();
             plugin.setAwaitingName(player.getUniqueId(), true);
         }
-    }
-
-
-    public Inventory createAdminGUI() {
-        Inventory gui = plugin.getServer().createInventory(null, 18, ChatColor.RED + "プレゼント設定");
-
-        // 下段の灰色板ガラス設置
-        ItemStack grayGlass = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = grayGlass.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(" ");
-            grayGlass.setItemMeta(meta);
-        }
-
-        for (int i = 9; i < 17; i++) {
-            gui.setItem(i, grayGlass);
-        }
-
-        // 右下に保存ボタン
-        ItemStack saveButton = new ItemStack(Material.EMERALD_BLOCK);
-        ItemMeta saveMeta = saveButton.getItemMeta();
-        if (saveMeta != null) {
-            saveMeta.setDisplayName(ChatColor.GREEN + "保存する");
-            saveButton.setItemMeta(saveMeta);
-        }
-        gui.setItem(17, saveButton);
-
-        return gui;
     }
 }
