@@ -3,6 +3,7 @@ package net.azisaba.simplepresents;
 import net.azisaba.simplepresents.listener.AdminPresentGuiListener;
 import net.azisaba.simplepresents.listener.AdminPresentChatListener;
 import net.azisaba.simplepresents.command.PresentCommand;
+import net.azisaba.simplepresents.model.Present;
 import net.azisaba.simplepresents.model.PresentItem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -78,10 +79,12 @@ public class SimplePresents extends JavaPlugin {
         LocalDate today = LocalDate.now();
         boolean receivedAny = false;
 
+        // プレゼントの確認処理
         for (String presentName : presents.keySet()) {
             ConfigurationSection presentSection = presentsConfig.getConfigurationSection("presents." + presentName);
             if (presentSection == null) continue;
 
+            // 期間の設定を取得
             String startStr = presentSection.getString("start");
             String endStr = presentSection.getString("end");
 
@@ -93,28 +96,32 @@ public class SimplePresents extends JavaPlugin {
             LocalDate startDate = LocalDate.parse(startStr);
             LocalDate endDate = LocalDate.parse(endStr);
 
+            // 期間外ならスキップ
             if (today.isBefore(startDate) || today.isAfter(endDate)) {
                 continue;
             }
 
+            // 受け取り済みならスキップ
             Set<String> received = receivedPlayers.getOrDefault(playerId, new HashSet<>());
             if (received.contains(presentName)) {
                 continue;
             }
 
-            List<PresentItem> presentItems = presents.get(presentName);
-            if (presentItems == null) {
+            // プレゼントを付与
+            Present present = (Present) presents.get(presentName);
+            if (present == null) {
                 getLogger().warning("プレゼント " + presentName + " のデータが見つかりません。");
                 continue;
             }
 
-            for (PresentItem presentItem : presentItems) {
-                player.getInventory().addItem(presentItem.toItemStack());
-            }
+            // プレゼントをアイテムとして付与
+            present.giveTo(player);
 
+            // メッセージの設定（yml から取得したメッセージを送信）
             String message = presentSection.getString("message", "プレゼント「" + presentName + "」を受け取りました！");
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
 
+            // 受け取り履歴に保存
             received.add(presentName);
             receivedPlayers.put(playerId, received);
             saveReceivedPlayers();
@@ -122,10 +129,12 @@ public class SimplePresents extends JavaPlugin {
             receivedAny = true;
         }
 
+        // 受け取れるプレゼントがなかった場合のメッセージ
         if (!receivedAny) {
             player.sendMessage(ChatColor.RED + "現在受け取れるプレゼントはありません。");
         }
     }
+
 
     public void loadPresentItems() {
         presentsFile = new File(getDataFolder(), "presents.yml");

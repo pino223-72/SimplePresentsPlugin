@@ -1,13 +1,30 @@
 presents:
   NewYearGift:
-    start: "2025-01-01"
-    end: "2025-01-10"
-    message: "&aお年玉を受け取りました！"
-    Predictive_Conversion: true
-    Passed_at_login: true
     items:
       - type: VANILLA
-        itemstack:
-          ==: org.bukkit.inventory.ItemStack
-          v: 2586
-          type: DIAMOND
+        material: DIAMOND
+        amount: 1
+      - type: CRACKSHOT
+        crackshot: SniperRifle
+      - type: MYTHICMOBS
+        mythic: LegendSword
+    start: "2025-01-01"
+    end: "2025-01-10"
+    message: "新年のプレゼントを受け取りました！"
+    Predictive_Conversion: true
+    Passed_at_login: true
+
+  ChristmasGift:
+    items:
+      - type: VANILLA
+        material: GOLDEN_SWORD
+        amount: 1
+      - type: CRACKSHOT
+        crackshot: DesertEagle
+      - type: MYTHICMOBS
+        mythic: DragonArmor
+    start: "2025-12-24"
+    end: "2025-12-25"
+    message: "メリークリスマス！プレゼントを受け取りました！"
+    Predictive_Conversion: false
+    Passed_at_login: false
