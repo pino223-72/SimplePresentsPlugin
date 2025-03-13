@@ -4,27 +4,8 @@ presents:
       - type: VANILLA
         material: DIAMOND
         amount: 1
-      - type: CRACKSHOT
-        crackshot: SniperRifle
-      - type: MYTHICMOBS
-        mythic: LegendSword
     start: "2025-01-01"
-    end: "2025-01-10"
-    message: "新年のプレゼントを受け取りました！"
+    end: "2025-01-03"
+    message: "新年のプレゼント！"
     Predictive_Conversion: true
     Passed_at_login: true
-
-  ChristmasGift:
-    items:
-      - type: VANILLA
-        material: GOLDEN_SWORD
-        amount: 1
-      - type: CRACKSHOT
-        crackshot: DesertEagle
-      - type: MYTHICMOBS
-        mythic: DragonArmor
-    start: "2025-12-24"
-    end: "2025-12-25"
-    message: "メリークリスマス！プレゼントを受け取りました！"
-    Predictive_Conversion: false
-    Passed_at_login: false

@@ -15,6 +15,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,12 +81,10 @@ public class SimplePresents extends JavaPlugin {
         LocalDate today = LocalDate.now();
         boolean receivedAny = false;
 
-        // プレゼントの確認処理
         for (String presentName : presents.keySet()) {
             ConfigurationSection presentSection = presentsConfig.getConfigurationSection("presents." + presentName);
             if (presentSection == null) continue;
 
-            // 期間の設定を取得
             String startStr = presentSection.getString("start");
             String endStr = presentSection.getString("end");
 
@@ -93,8 +93,10 @@ public class SimplePresents extends JavaPlugin {
                 continue;
             }
 
-            LocalDate startDate = LocalDate.parse(startStr);
-            LocalDate endDate = LocalDate.parse(endStr);
+            // 日付文字列を適切な形式に変換
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzzz yyyy");
+            LocalDate startDate = LocalDate.parse(startStr, formatter);
+            LocalDate endDate = LocalDate.parse(endStr, formatter);
 
             // 期間外ならスキップ
             if (today.isBefore(startDate) || today.isAfter(endDate)) {
@@ -114,10 +116,9 @@ public class SimplePresents extends JavaPlugin {
                 continue;
             }
 
-            // プレゼントをアイテムとして付与
             present.giveTo(player);
 
-            // メッセージの設定（yml から取得したメッセージを送信）
+            // メッセージを送信
             String message = presentSection.getString("message", "プレゼント「" + presentName + "」を受け取りました！");
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
 
@@ -129,7 +130,6 @@ public class SimplePresents extends JavaPlugin {
             receivedAny = true;
         }
 
-        // 受け取れるプレゼントがなかった場合のメッセージ
         if (!receivedAny) {
             player.sendMessage(ChatColor.RED + "現在受け取れるプレゼントはありません。");
         }
