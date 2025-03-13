@@ -7,9 +7,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
-
 public class PresentItem {
     private String type;
     private Material material;
@@ -29,10 +26,11 @@ public class PresentItem {
     public static PresentItem deserialize(Map<String, Object> map) {
         String type = (String) map.get("type");
 
+        // Materialの取得時にnullチェックを強化
         String materialName = (String) map.get("material");
         Material material = (materialName != null && Material.getMaterial(materialName) != null)
                 ? Material.getMaterial(materialName)
-                : Material.STONE; // Default value for material
+                : Material.STONE; // Default value for material if not found
 
         int amount = map.containsKey("amount") ? (int) map.get("amount") : 1; // Default amount if not specified
         String crackshot = (String) map.get("crackshot");
@@ -55,14 +53,13 @@ public class PresentItem {
     public static PresentItem fromItemStack(ItemStack itemStack) {
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null) {
-            String type = meta.getDisplayName(); // 例: プレゼントのタイプを名前として使用
+            String type = meta.getDisplayName(); // プレゼントのタイプを名前として使用
             Material material = itemStack.getType();
             int amount = itemStack.getAmount();
             return new PresentItem(type, material, amount, null, null); // crackshot や mythic は null で構いません
         }
         return null;
     }
-
 
     // Method to create ItemStack from PresentItem
     public ItemStack toItemStack() {
@@ -78,13 +75,20 @@ public class PresentItem {
     public void giveTo(Player player) {
         if (this.type.equals("VANILLA")) {
             // VANILLA アイテムの処理
-            ItemStack item = new ItemStack(Material.valueOf(String.valueOf(this.material)), this.amount);
+            ItemStack item = new ItemStack(this.material, this.amount);
             player.getInventory().addItem(item);
         } else if (this.type.equals("CRACKSHOT")) {
             // CRACKSHOT アイテムの処理
-            // CrackShotのアイテム処理コード
+            if (crackshot != null) {
+                // CrackShotのアイテム処理コード（例: アイテムをプレイヤーに与える）
+                // 例えば、CrackShotAPIなどを使ってSniperRifleを付与するコードをここに書く
+            }
         } else if (this.type.equals("MYTHICMOBS")) {
             // MythicMobsのアイテム処理コード
+            if (mythic != null) {
+                // MythicMobsのアイテム処理（例: MythicMobsAPIを使用）
+                // mythicアイテムをプレイヤーに与える処理を追加
+            }
         }
         // 他のタイプの処理が必要な場合は追加します
     }

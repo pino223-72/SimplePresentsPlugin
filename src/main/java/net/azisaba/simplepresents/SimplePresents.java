@@ -82,6 +82,8 @@ public class SimplePresents extends JavaPlugin {
         boolean receivedAny = false;
 
         for (String presentName : presents.keySet()) {
+            List<PresentItem> presentItems = presents.get(presentName);  // List<PresentItem> で取得
+
             ConfigurationSection presentSection = presentsConfig.getConfigurationSection("presents." + presentName);
             if (presentSection == null) continue;
 
@@ -93,7 +95,6 @@ public class SimplePresents extends JavaPlugin {
                 continue;
             }
 
-            // 日付文字列を適切なフォーマットで解析
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate startDate = LocalDate.parse(startStr, formatter);
             LocalDate endDate = LocalDate.parse(endStr, formatter);
@@ -109,14 +110,10 @@ public class SimplePresents extends JavaPlugin {
                 continue;
             }
 
-            // プレゼントを付与
-            Present present = presents.get(presentName);
-            if (present == null) {
-                getLogger().warning("プレゼント " + presentName + " のデータが見つかりません。");
-                continue;
+            // PresentItemを使ってプレゼントを渡す
+            for (PresentItem presentItem : presentItems) {
+                presentItem.giveTo(player);  // 例えば、PresentItemクラスのgiveToメソッドを使用してアイテムを渡す
             }
-
-            present.giveTo(player);
 
             // メッセージを送信
             String message = presentSection.getString("message", "プレゼント「" + presentName + "」を受け取りました！");
@@ -134,6 +131,7 @@ public class SimplePresents extends JavaPlugin {
             player.sendMessage(ChatColor.RED + "現在受け取れるプレゼントはありません。");
         }
     }
+
 
 
     public void loadPresentItems() {
