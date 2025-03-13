@@ -1,6 +1,5 @@
-package net.azisaba.simplepresents.command;
+package net.azisaba.simplepresents;
 
-import net.azisaba.simplepresents.SimplePresents;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

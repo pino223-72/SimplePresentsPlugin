@@ -1,6 +1,5 @@
 package net.azisaba.simplepresents;
 
-import net.azisaba.simplepresents.command.PresentCommand;
 import net.azisaba.simplepresents.listener.AdminPresentChatListener;
 import net.azisaba.simplepresents.listener.AdminPresentGuiListener;
 import net.azisaba.simplepresents.model.Present;
