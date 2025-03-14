@@ -20,7 +20,7 @@ public class PresentItem {
         this.amount = amount;
         this.crackshot = crackshot;
         this.mythic = mythic;
-        
+
     }
 
     // Deserialization method to convert the stored map to a PresentItem object
