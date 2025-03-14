@@ -1,9 +1,11 @@
 package net.azisaba.simplepresents.model;
 
+import com.shampaggon.crackshot.api.CSWeaponManager;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,33 +16,34 @@ public class PresentItem {
     private String crackshot;
     private String mythic;
 
+    // コンストラクタ
     public PresentItem(String type, Material material, int amount, String crackshot, String mythic) {
         this.type = type;
         this.material = material;
         this.amount = amount;
         this.crackshot = crackshot;
         this.mythic = mythic;
-
     }
 
-    // Deserialization method to convert the stored map to a PresentItem object
+    // MapをPresentItemに変換するメソッド (Deserialization)
     public static PresentItem deserialize(Map<String, Object> map) {
         String type = (String) map.get("type");
 
-        // Materialの取得時にnullチェックを強化
+        // Materialの取得
         String materialName = (String) map.get("material");
         Material material = (materialName != null && Material.getMaterial(materialName) != null)
                 ? Material.getMaterial(materialName)
-                : Material.STONE; // Default value for material if not found
+                : Material.STONE; // Default value for material
 
-        int amount = map.containsKey("amount") ? (int) map.get("amount") : 1; // Default amount if not specified
+        // Amount（数量）の取得、指定がなければデフォルトで1
+        int amount = map.containsKey("amount") ? (int) map.get("amount") : 1;
         String crackshot = (String) map.get("crackshot");
         String mythic = (String) map.get("mythic");
 
         return new PresentItem(type, material, amount, crackshot, mythic);
     }
 
-    // Serialization method to convert the PresentItem object to a map
+    // PresentItemをMapに変換するメソッド (Serialization)
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put("type", type);
@@ -51,6 +54,7 @@ public class PresentItem {
         return map;
     }
 
+    // ItemStackをPresentItemに変換するメソッド
     public static PresentItem fromItemStack(ItemStack itemStack) {
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null) {
@@ -62,17 +66,18 @@ public class PresentItem {
         return null;
     }
 
-    // Method to create ItemStack from PresentItem
+    // PresentItemをItemStackに変換するメソッド
     public ItemStack toItemStack() {
         ItemStack itemStack = new ItemStack(material, amount);
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(type); // Example display name based on the type of the present
+            meta.setDisplayName(type); // アイテム名をタイプに設定
             itemStack.setItemMeta(meta);
         }
         return itemStack;
     }
 
+    // プレイヤーにアイテムを与える処理
     public void giveTo(Player player) {
         if (this.type.equals("VANILLA")) {
             // VANILLA アイテムの処理
@@ -81,20 +86,22 @@ public class PresentItem {
         } else if (this.type.equals("CRACKSHOT")) {
             // CRACKSHOT アイテムの処理
             if (crackshot != null) {
-                // CrackShotのアイテム処理コード（例: アイテムをプレイヤーに与える）
-                // 例えば、CrackShotAPIなどを使ってSniperRifleを付与するコードをここに書く
+                // CrackShotAPIを使用してアイテムをプレイヤーに与える
+                CSWeaponManager weaponManager = new CSWeaponManager();
+                weaponManager.giveWeapon(player, crackshot);
             }
         } else if (this.type.equals("MYTHICMOBS")) {
             // MythicMobsのアイテム処理コード
             if (mythic != null) {
-                // MythicMobsのアイテム処理（例: MythicMobsAPIを使用）
-                // mythicアイテムをプレイヤーに与える処理を追加
+                // MythicMobs APIを使用してアイテムをプレイヤーに与える
+                // 例えば、MythicMobsのAPIを使ってアイテムを与えるコード
+                // ここでMythicMobsのAPIが提供する適切なメソッドを呼び出す
+                // 例: MythicMobs.getAPI().givePlayerItem(player, mythic);
             }
         }
-        // 他のタイプの処理が必要な場合は追加します
     }
 
-    // Getters and setters for the fields
+    // Getterメソッド
     public String getType() {
         return type;
     }
