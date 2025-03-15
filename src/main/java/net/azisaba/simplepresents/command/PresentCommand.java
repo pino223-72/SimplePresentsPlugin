@@ -33,7 +33,7 @@ public class PresentCommand implements CommandExecutor {
 
         switch (args[0].toLowerCase()) {
             case "get":
-                plugin.givePresent(player);
+                plugin.givePresent(player, presentName);
                 return true;
 
             case "set":

@@ -2,9 +2,8 @@ presents:
   NewYearGift:
     items:
       - type: VANILLA
-        itemstack:
-          type: DIAMOND
-          amount: 1
+        material: DIAMOND
+        amount: 1
     start: "2025-01-01"
     end: "2025-04-10"
     message: "新年のプレゼントを受け取りました！"
