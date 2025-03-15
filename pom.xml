@@ -65,6 +65,10 @@
           <id>local-repo</id>
           <url>file://${project.basedir}/lib</url>
       </repository>
+      <repository>
+          <id>mythiccraft-repo</id>
+          <url>https://mvn.lumine.io/repository/maven-public/</url>
+      </repository>
   </repositories>
 
   <dependencies>
@@ -83,7 +87,7 @@
       <dependency>
           <groupId>io.lumine</groupId>
           <artifactId>mythicmobs</artifactId>
-          <version>4.12.0</version>
+          <version>5.2.0</version>
           <scope>provided</scope>
       </dependency>
   </dependencies>
