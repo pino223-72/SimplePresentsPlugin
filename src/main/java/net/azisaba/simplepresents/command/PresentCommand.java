@@ -8,8 +8,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.List;
-
 public class PresentCommand implements CommandExecutor {
     private final SimplePresents plugin;
 
@@ -33,6 +31,11 @@ public class PresentCommand implements CommandExecutor {
 
         switch (args[0].toLowerCase()) {
             case "get":
+                if (args.length < 2) {
+                    player.sendMessage(ChatColor.RED + "使用方法: /presents get <プレゼント名>");
+                    return true;
+                }
+                String presentName = args[1]; // 変数を定義
                 plugin.givePresent(player, presentName);
                 return true;
 
