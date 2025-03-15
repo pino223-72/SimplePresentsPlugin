@@ -6,7 +6,7 @@ presents:
           type: DIAMOND
           amount: 1
     start: "2025-01-01"
-    end: "2025-01-10"
+    end: "2025-04-10"
     message: "新年のプレゼントを受け取りました！"
     Predictive_Conversion: true
     Passed_at_login: true

@@ -159,18 +159,33 @@ public class SimplePresents extends JavaPlugin {
     public void savePresentItems() {
         for (Map.Entry<String, List<PresentItem>> entry : presents.entrySet()) {
             List<Map<String, Object>> serializedItems = new ArrayList<>();
+
             for (PresentItem item : entry.getValue()) {
                 serializedItems.add(item.serialize());
             }
+
+            // プレゼントの基本情報を保存
             presentsConfig.set("presents." + entry.getKey() + ".items", serializedItems);
+
+            // 既存の設定（start, end, message, etc.）をそのまま保持する
+            ConfigurationSection section = presentsConfig.getConfigurationSection("presents." + entry.getKey());
+            if (section != null) {
+                presentsConfig.set("presents." + entry.getKey() + ".start", section.getString("start", "2025-01-01"));
+                presentsConfig.set("presents." + entry.getKey() + ".end", section.getString("end", "2025-12-31"));
+                presentsConfig.set("presents." + entry.getKey() + ".message", section.getString("message", "プレゼントを受け取りました！"));
+                presentsConfig.set("presents." + entry.getKey() + ".Predictive_Conversion", section.getBoolean("Predictive_Conversion", true));
+                presentsConfig.set("presents." + entry.getKey() + ".Passed_at_login", section.getBoolean("Passed_at_login", true));
+            }
         }
 
         try {
             presentsConfig.save(presentsFile);
         } catch (IOException e) {
+            getLogger().severe("プレゼントデータの保存中にエラーが発生しました！");
             e.printStackTrace();
         }
     }
+
 
     // プレイヤーが受け取ったプレゼント履歴をリセット
     public void resetPlayerPresents(String playerName) {
@@ -197,7 +212,7 @@ public class SimplePresents extends JavaPlugin {
 
     // プレゼントを保存
     public void savePresent(String presentName, List<PresentItem> items) {
-        presents.put(presentName, items); // メモリ上に保存
+        presents.put(presentName, items); // メモリに保存
 
         List<Map<String, Object>> serializedItems = new ArrayList<>();
         for (PresentItem item : items) {
@@ -205,16 +220,20 @@ public class SimplePresents extends JavaPlugin {
         }
 
         presentsConfig.set("presents." + presentName + ".items", serializedItems);
-        presentsConfig.set("presents." + presentName + ".start", "2025-01-01"); // 仮の日付
-        presentsConfig.set("presents." + presentName + ".end", "2025-1-03");   // 仮の日付
+        presentsConfig.set("presents." + presentName + ".start", "2025-01-01"); // 仮のデフォルト日付
+        presentsConfig.set("presents." + presentName + ".end", "2025-12-31");   // 仮のデフォルト日付
+        presentsConfig.set("presents." + presentName + ".message", "プレゼント「" + presentName + "」を受け取りました！");
+        presentsConfig.set("presents." + presentName + ".Predictive_Conversion", true);
+        presentsConfig.set("presents." + presentName + ".Passed_at_login", true);
 
         try {
             presentsConfig.save(presentsFile);
         } catch (IOException e) {
-            getLogger().severe("プレゼントデータの保存に失敗しました: " + presentName);
+            getLogger().severe("プレゼント " + presentName + " の保存中にエラーが発生しました！");
             e.printStackTrace();
         }
     }
+
 
     // プレゼント履歴の保存
     public void saveReceivedPlayers() {
