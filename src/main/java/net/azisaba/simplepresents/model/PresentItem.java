@@ -10,8 +10,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
 public class PresentItem {
     private String type;
     private Material material;
