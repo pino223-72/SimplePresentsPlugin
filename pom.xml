@@ -63,7 +63,7 @@
       </repository>
       <repository>
           <id>local-repo</id>
-          <url>file://${project.basedir}/lib</url> <>
+          <url>file://${project.basedir}/lib</url>
       </repository>
   </repositories>
 
@@ -72,6 +72,12 @@
           <groupId>com.destroystokyo.paper</groupId>
           <artifactId>paper-api</artifactId>
           <version>1.16.5-R0.1-SNAPSHOT</version>
+          <scope>provided</scope>
+      </dependency>
+      <dependency>
+          <groupId>com.shampaggon</groupId>
+          <artifactId>crackshot</artifactId>
+          <version>1.0</version>
           <scope>provided</scope>
       </dependency>
   </dependencies>
