@@ -1,7 +1,8 @@
 package net.azisaba.simplepresents.model;
 
 import com.shampaggon.crackshot.CSUtility;
-import org.bukkit.Bukkit;
+import io.lumine.mythic.bukkit.MythicBukkit;
+import io.lumine.mythic.bukkit.items.MythicItem;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +18,6 @@ public class PresentItem {
     private String crackshot;
     private String mythic;
 
-    // コンストラクタ
     public PresentItem(String type, Material material, int amount, String crackshot, String mythic) {
         this.type = type;
         this.material = material;
@@ -26,17 +26,15 @@ public class PresentItem {
         this.mythic = mythic;
     }
 
-    // MapをPresentItemに変換するメソッド (Deserialization)
+    // Deserialization method to convert the stored map to a PresentItem object
     public static PresentItem deserialize(Map<String, Object> map) {
         String type = (String) map.get("type");
 
-        // Materialの取得
         String materialName = (String) map.get("material");
         Material material = (materialName != null && Material.getMaterial(materialName) != null)
                 ? Material.getMaterial(materialName)
-                : Material.STONE; // Default value for material
+                : Material.STONE; // デフォルト値（エラー防止）
 
-        // Amount（数量）の取得、指定がなければデフォルトで1
         int amount = map.containsKey("amount") ? (int) map.get("amount") : 1;
         String crackshot = (String) map.get("crackshot");
         String mythic = (String) map.get("mythic");
@@ -44,7 +42,7 @@ public class PresentItem {
         return new PresentItem(type, material, amount, crackshot, mythic);
     }
 
-    // PresentItemをMapに変換するメソッド (Serialization)
+    // Serialization method to convert the PresentItem object to a map
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put("type", type);
@@ -55,67 +53,38 @@ public class PresentItem {
         return map;
     }
 
-    // ItemStackをPresentItemに変換するメソッド
-    public static PresentItem fromItemStack(ItemStack itemStack) {
-        ItemMeta meta = itemStack.getItemMeta();
-        if (meta != null) {
-            String type = meta.getDisplayName(); // プレゼントのタイプを名前として使用
-            Material material = itemStack.getType();
-            int amount = itemStack.getAmount();
-            return new PresentItem(type, material, amount, null, null); // crackshot や mythic は null で構いません
-        }
-        return null;
-    }
-
-    // PresentItemをItemStackに変換するメソッド
-    public ItemStack toItemStack() {
-        ItemStack itemStack = new ItemStack(material, amount);
-        ItemMeta meta = itemStack.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(type); // アイテム名をタイプに設定
-            itemStack.setItemMeta(meta);
-        }
-        return itemStack;
-    }
-
-    // プレイヤーにアイテムを与える処理
     public void giveTo(Player player) {
         if (this.type.equals("VANILLA")) {
-            // バニラアイテム
-            ItemStack item = new ItemStack(material, amount);
+            ItemStack item = new ItemStack(this.material, this.amount);
             player.getInventory().addItem(item);
-        } else if (this.type.equals("CRACKSHOT")) {
-            // CrackShotの武器
-            if (crackshot != null) {
-                CSUtility cs = new CSUtility();
-                cs.giveWeapon(player, crackshot, amount);
-            }
-        } else if (this.type.equals("MYTHICMOBS")) {
-            // MythicMobs のアイテム
-            if (mythic != null) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mm items get " + mythic + " " + amount + " " + player.getName());
+        } else if (this.type.equals("CRACKSHOT") && crackshot != null) {
+            CSUtility cs = new CSUtility();
+            cs.giveWeapon(player, crackshot, amount);
+        } else if (this.type.equals("MYTHICMOBS") && mythic != null) {
+            MythicItem mythicItem = MythicBukkit.inst().getItemManager().getItem(mythic).orElse(null);
+            if (mythicItem != null) {
+                player.getInventory().addItem(mythicItem.generateItemStack(amount));
+            } else {
+                player.sendMessage("§cMythicMobsアイテム '" + mythic + "' が見つかりませんでした！");
             }
         }
     }
 
-    // Getterメソッド
-    public String getType() {
-        return type;
+    // ItemStack から PresentItem を作成
+    public static PresentItem fromItemStack(ItemStack itemStack) {
+        Material material = itemStack.getType();
+        int amount = itemStack.getAmount();
+        return new PresentItem("VANILLA", material, amount, null, null);
     }
 
-    public Material getMaterial() {
-        return material;
-    }
-
-    public int getAmount() {
-        return amount;
-    }
-
-    public String getCrackshot() {
-        return crackshot;
-    }
-
-    public String getMythic() {
-        return mythic;
+    // ItemStack に変換
+    public ItemStack toItemStack() {
+        ItemStack item = new ItemStack(material, amount);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(type);
+            item.setItemMeta(meta);
+        }
+        return item;
     }
 }

@@ -76,61 +76,56 @@ public class SimplePresents extends JavaPlugin {
     }
 
     // プレゼントを渡す
-    public void givePresent(Player player) {
+    public void givePresent(Player player, String presentName) {
         UUID playerId = player.getUniqueId();
         LocalDate today = LocalDate.now();
-        boolean receivedAny = false;
 
-        for (String presentName : presents.keySet()) {
-            List<PresentItem> presentItems = presents.get(presentName);  // List<PresentItem> で取得
-
-            ConfigurationSection presentSection = presentsConfig.getConfigurationSection("presents." + presentName);
-            if (presentSection == null) continue;
-
-            String startStr = presentSection.getString("start");
-            String endStr = presentSection.getString("end");
-
-            if (startStr == null || endStr == null) {
-                getLogger().warning("プレゼント " + presentName + " の期間設定が不正です。");
-                continue;
-            }
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate startDate = LocalDate.parse(startStr, formatter);
-            LocalDate endDate = LocalDate.parse(endStr, formatter);
-
-            // 期間外ならスキップ
-            if (today.isBefore(startDate) || today.isAfter(endDate)) {
-                continue;
-            }
-
-            // 受け取り済みならスキップ
-            Set<String> received = receivedPlayers.getOrDefault(playerId, new HashSet<>());
-            if (received.contains(presentName)) {
-                continue;
-            }
-
-            // PresentItemを使ってプレゼントを渡す
-            for (PresentItem presentItem : presentItems) {
-                presentItem.giveTo(player);  // 例えば、PresentItemクラスのgiveToメソッドを使用してアイテムを渡す
-            }
-
-            // メッセージを送信
-            String message = presentSection.getString("message", "プレゼント「" + presentName + "」を受け取りました！");
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
-
-            // 受け取り履歴に保存
-            received.add(presentName);
-            receivedPlayers.put(playerId, received);
-            saveReceivedPlayers();
-
-            receivedAny = true;
+        ConfigurationSection presentSection = presentsConfig.getConfigurationSection("presents." + presentName);
+        if (presentSection == null) {
+            player.sendMessage(ChatColor.RED + "プレゼント '" + presentName + "' は存在しません！");
+            return;
         }
 
-        if (!receivedAny) {
-            player.sendMessage(ChatColor.RED + "現在受け取れるプレゼントはありません。");
+        String startStr = presentSection.getString("start");
+        String endStr = presentSection.getString("end");
+
+        if (startStr == null || endStr == null) {
+            player.sendMessage(ChatColor.RED + "プレゼント '" + presentName + "' の日付設定が無効です！");
+            return;
         }
+
+        LocalDate startDate = LocalDate.parse(startStr);
+        LocalDate endDate = LocalDate.parse(endStr);
+
+        if (today.isBefore(startDate) || today.isAfter(endDate)) {
+            player.sendMessage(ChatColor.RED + "プレゼント '" + presentName + "' は現在受け取れません！");
+            return;
+        }
+
+        Set<String> received = receivedPlayers.getOrDefault(playerId, new HashSet<>());
+        if (received.contains(presentName)) {
+            player.sendMessage(ChatColor.RED + "あなたはすでに '" + presentName + "' を受け取っています！");
+            return;
+        }
+
+        List<PresentItem> presentItems = presents.get(presentName);
+        if (presentItems == null || presentItems.isEmpty()) {
+            player.sendMessage(ChatColor.RED + "プレゼント '" + presentName + "' にアイテムが設定されていません！");
+            return;
+        }
+
+        for (PresentItem item : presentItems) {
+            item.giveTo(player);
+        }
+
+        String message = presentSection.getString("message", "プレゼント「" + presentName + "」を受け取りました！");
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+
+        received.add(presentName);
+        receivedPlayers.put(playerId, received);
+        saveReceivedPlayers();
     }
+
 
 
 
