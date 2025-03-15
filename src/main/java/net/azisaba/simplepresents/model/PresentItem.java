@@ -1,8 +1,8 @@
 package net.azisaba.simplepresents.model;
 
-import com.shampaggon.crackshot.CSUtility;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.items.MythicItem;
+import com.shampaggon.crackshot.CSUtility;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -10,6 +10,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class PresentItem {
     private String type;
@@ -26,14 +27,14 @@ public class PresentItem {
         this.mythic = mythic;
     }
 
-    // Deserialization method to convert the stored map to a PresentItem object
+    // Deserialization method
     public static PresentItem deserialize(Map<String, Object> map) {
         String type = (String) map.get("type");
 
         String materialName = (String) map.get("material");
         Material material = (materialName != null && Material.getMaterial(materialName) != null)
                 ? Material.getMaterial(materialName)
-                : Material.STONE; // デフォルト値（エラー防止）
+                : Material.STONE;
 
         int amount = map.containsKey("amount") ? (int) map.get("amount") : 1;
         String crackshot = (String) map.get("crackshot");
@@ -42,7 +43,7 @@ public class PresentItem {
         return new PresentItem(type, material, amount, crackshot, mythic);
     }
 
-    // Serialization method to convert the PresentItem object to a map
+    // Serialization method
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put("type", type);
@@ -53,38 +54,66 @@ public class PresentItem {
         return map;
     }
 
+    public static PresentItem fromItemStack(ItemStack itemStack) {
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null) {
+            String type = meta.getDisplayName();
+            Material material = itemStack.getType();
+            int amount = itemStack.getAmount();
+            return new PresentItem(type, material, amount, null, null);
+        }
+        return null;
+    }
+
+    public ItemStack toItemStack() {
+        ItemStack itemStack = new ItemStack(material, amount);
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(type);
+            itemStack.setItemMeta(meta);
+        }
+        return itemStack;
+    }
+
     public void giveTo(Player player) {
-        if (this.type.equals("VANILLA")) {
-            ItemStack item = new ItemStack(this.material, this.amount);
+        if ("VANILLA".equals(this.type)) {
+            ItemStack item = new ItemStack(material, amount);
             player.getInventory().addItem(item);
-        } else if (this.type.equals("CRACKSHOT") && crackshot != null) {
+            player.sendMessage("§a通常アイテム " + material + " を " + amount + " 個受け取りました！");
+        } else if ("CRACKSHOT".equals(this.type) && crackshot != null) {
             CSUtility cs = new CSUtility();
             cs.giveWeapon(player, crackshot, amount);
-        } else if (this.type.equals("MYTHICMOBS") && mythic != null) {
-            MythicItem mythicItem = MythicBukkit.inst().getItemManager().getItem(mythic).orElse(null);
-            if (mythicItem != null) {
-                player.getInventory().addItem(mythicItem.generateItemStack(amount));
+            player.sendMessage("§bCrackShot武器 " + crackshot + " を受け取りました！");
+        } else if ("MYTHICMOBS".equals(this.type) && mythic != null) {
+            Optional<MythicItem> mythicItem = MythicBukkit.inst().getItemManager().getItem(mythic);
+            if (mythicItem.isPresent()) {
+                player.getInventory().addItem(mythicItem.get().generateItemStack(amount));
+                player.sendMessage("§dMythicMobsアイテム " + mythic + " を受け取りました！");
             } else {
                 player.sendMessage("§cMythicMobsアイテム '" + mythic + "' が見つかりませんでした！");
             }
+        } else {
+            player.sendMessage("§c無効なアイテムタイプです！");
         }
     }
 
-    // ItemStack から PresentItem を作成
-    public static PresentItem fromItemStack(ItemStack itemStack) {
-        Material material = itemStack.getType();
-        int amount = itemStack.getAmount();
-        return new PresentItem("VANILLA", material, amount, null, null);
+    public String getType() {
+        return type;
     }
 
-    // ItemStack に変換
-    public ItemStack toItemStack() {
-        ItemStack item = new ItemStack(material, amount);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(type);
-            item.setItemMeta(meta);
-        }
-        return item;
+    public Material getMaterial() {
+        return material;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public String getCrackshot() {
+        return crackshot;
+    }
+
+    public String getMythic() {
+        return mythic;
     }
 }
