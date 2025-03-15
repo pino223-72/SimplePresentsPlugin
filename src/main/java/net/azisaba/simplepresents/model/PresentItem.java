@@ -1,6 +1,7 @@
 package net.azisaba.simplepresents.model;
 
-import com.shampaggon.crackshot.api.CSWeaponManager;
+import com.shampaggon.crackshot.CSUtility;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -80,23 +81,19 @@ public class PresentItem {
     // プレイヤーにアイテムを与える処理
     public void giveTo(Player player) {
         if (this.type.equals("VANILLA")) {
-            // VANILLA アイテムの処理
-            ItemStack item = new ItemStack(this.material, this.amount);
+            // バニラアイテム
+            ItemStack item = new ItemStack(material, amount);
             player.getInventory().addItem(item);
         } else if (this.type.equals("CRACKSHOT")) {
-            // CRACKSHOT アイテムの処理
+            // CrackShotの武器
             if (crackshot != null) {
-                // CrackShotAPIを使用してアイテムをプレイヤーに与える
-                CSWeaponManager weaponManager = new CSWeaponManager();
-                weaponManager.giveWeapon(player, crackshot);
+                CSUtility cs = new CSUtility();
+                cs.giveWeapon(player, crackshot, amount);
             }
         } else if (this.type.equals("MYTHICMOBS")) {
-            // MythicMobsのアイテム処理コード
+            // MythicMobs のアイテム
             if (mythic != null) {
-                // MythicMobs APIを使用してアイテムをプレイヤーに与える
-                // 例えば、MythicMobsのAPIを使ってアイテムを与えるコード
-                // ここでMythicMobsのAPIが提供する適切なメソッドを呼び出す
-                // 例: MythicMobs.getAPI().givePlayerItem(player, mythic);
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mm items get " + mythic + " " + amount + " " + player.getName());
             }
         }
     }
