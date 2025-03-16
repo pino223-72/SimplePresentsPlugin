@@ -54,37 +54,22 @@
 
     <repositories>
         <repository>
-            <id>maven-central</id>
-            <url>https://repo.maven.apache.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>mythiccraft-repo</id>
-            <url>https://mvn.lumine.io/repository/maven-public/</url>
-        </repository>
-        <repository>
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
     </repositories>
 
-
     <dependencies>
         <dependency>
-            <groupId>com.destroystokyo.paper</groupId>
+            <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.16.5-R0.1-SNAPSHOT</version>
+            <version>1.16.5</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.shampaggon</groupId>
             <artifactId>crackshot</artifactId>
             <version>1.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.lumine</groupId>
-            <artifactId>mythicmobs</artifactId>
-            <version>5.2.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
